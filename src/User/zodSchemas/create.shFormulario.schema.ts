@@ -1,0 +1,28 @@
+import { z } from 'zod';
+
+export const createShareholderFormSchema = z.object({
+  cedula: z.string(),
+  nombres: z.string(),
+  apellidos: z.string(),
+  email: z.string().email(),
+  direccion: z.string(),
+  pais: z.string(),
+  ciudad: z.string(),
+  provincia: z.string(),
+  canton: z.string(),
+  estadoCivil: z.string(),
+  tituloProfesional: z.string(),
+  nombreUniversidad: z.string().optional(),
+  descripcionProfesional: z.string().optional(),
+  numeroTelefono: z.string(),
+  codigoPais: z.string().optional(),
+  discapacidad: z.string(),
+  tipodiscapacidad: z.string().optional(),
+  descripcionDiscapacidad: z.string().optional(),
+  fechaNacimiento: z.string(),
+  fechaSolicitud: z.string(),
+  fechaEmision: z.string(),
+  montoInversion: z.number(),
+  comprobantePago: z.string().optional(),
+  tipo: z.string(),
+});

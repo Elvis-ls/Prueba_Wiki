@@ -1,0 +1,109 @@
+postgres
+npm run dev: Para iniciar la app.
+
+npm install nodemailer : Para instalar nodemailer
+npm install --save-dev @types/nodemailer
+---------------------------------------------------------------------------------------------------------
+Para instalar ts-node
+npm install ts-node-dev --save-dev : Para installar ts-node.
+npx prisma generate : Para generar el cliente.
+
+instalar dependencias necesarias: npm install express --save
+dependencias de desarrollo: npm install -D typescript ts-node @types/node @types/express prisma
+
+npm install prisma --save-dev : para instalar prisma.
+npm install @prisma/client : instalar el cliente de prisma.
+npx prisma generate : Para generar el cliente.
+npx prisma init : crear la carpeta prisma y schema.prisma
+npx prisma migrate dev --name "Tunombre" : Para empezar la migración y creación de la tabla.
+npx prisma studio : Para ver si esta trabajando con mi base de datos y ver los datos.
+npx prisma migrate reset : Para eliminar la migración.
+
+npm install express --save : Para instalar express
+
+npm install zod : Para instalar zod.
+
+//Crear el archivo tsconfig.json.
+npx tsc --init.
+
+Para usar bcrypt para encriptar la contraseña
+npm install bcrypt
+npm install -D @types/bcrypt
+
+npm install jsonwebtoken : Para poder usar JWT
+npm install --save-dev @types/jsonwebtoken : Para instalar los tipos de TypeScript.
+
+npm install dotenv : Para instalar dotenv
+npm install cors : Para instalar cors
+
+Rutas User
+http://localhost:3001/api/validate/validateUser
+http://localhost:3001/api/auth/login
+
+PARA PRUEBAS
+para el acceso administrador, pero debe estar en la base de datos
+institucionaneupi@gmail.com
+Contraseña: Aneupi_12
+
+para el acceso al accionista, pero debe estar en la base de datos
+usuario.accionista@gmail.com
+Contraseña: accionista_123
+
+http://localhost:3001/api/validate/validateUser :Ruta para verificar los 4 campos de seguridad.
+http://localhost:3001/api/auth/login :Ruta de login user
+http://localhost:3001/api/register/:cedula/complete :Ruta para completar la información de registro.
+http://localhost:3001/api/user/information :Ruta para actualizar la información en el inicio de la pagina.
+http://localhost:3001/api/user/recovery-password :Ruta para recuperar contraseña user.
+http://localhost:3001/api/user/monto-contribution :Ruta para que el user agregue un monto.
+http://localhost:3001/api/user/payment :Ruta para que se actualice el después de realizar su pago.
+http://localhost:3001/api/user/mark-as-read/:idnotification :Ruta para marcar como leida una noticia.
+http://localhost:3001/api/user/create/credits :Ruta para crear un credito.
+
+Rutas Admin
+http://localhost:3001/api/admin/create-user :Ruta para que el administrador registre un user como accionista.
+http://localhost:3001/api/admin/create :Ruta para crear un administrador.
+http://localhost:3001/api/admin/login : Ruta login del administrador.
+http://localhost:3001/api/admin/create-news :Ruta para agregar una noticas solo admin.
+http://localhost:3001/api/admin/shareholder-form/:id :Ruta para aceptar o rechazar el formulario de shareholder.
+http://localhost:3001/api/admin/recovery-password :Ruta para recuperar contraseña Admin.
+
+Ruta shareHolder formulario
+http://localhost:3001/api/formulario :Ruta para crear el formulario.
+
+
+//Ejemplo para crédito.
+{
+  "cedula": "1234567890",
+  "nombres": "Juan",
+  "apellidos": "Pérez",
+  "email": "juan.perez@gmail.com",
+  "direccion": "Av. Simón Bolívar y Eloy Alfaro",
+  "pais": "Ecuador",
+  "ciudad": "Quito",
+  "provincia": "Pichincha",
+  "canton": "Quito",
+  "estadoCivil": "Soltero",
+  "tituloProfesional": "Ingeniero en Sistemas",
+  "nombreUniversidad": "Universidad Central",
+  "descripcionProfesional": "5 años de experiencia en desarrollo de software",
+  "numeroTelefono": "0991234567",
+  "codigoPais": "+593",
+  "discapacidad": "No",
+  "tipodiscapacidad": null,
+  "descripcionDiscapacidad": null,
+  "fechaEmision": "2025-05-21",
+  "montoCredito": 15000,
+  "tipodeCredito": "Crédito de Consumo",
+  "garantes": [
+    {
+      "nombresGarante": "Carlos",
+      "apellidosGarante": "Lopez",
+      "whatsappGarante": "+593991234567"
+    },
+    {
+      "nombresGarante": "Maria",
+      "apellidosGarante": "Gonzalez",
+      "whatsappGarante": "+593987654321"
+    }
+  ]
+}

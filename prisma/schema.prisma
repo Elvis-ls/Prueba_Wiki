@@ -1,0 +1,522 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model admin {
+  id                   Int        @id @default(autoincrement())
+  createdAt            DateTime   @default(now())
+  names                String
+  lastNames            String
+  cedula               String     @unique
+  accountNumber        String     @unique
+  email                String?    @unique
+  password             String?
+  description          String?
+  addressHome          String?
+  areaPosition         String?
+  institutionLevel     String?
+  location             String?
+  fingerprintCode      String?    @unique
+  ultimosDigitosCarnet String?    
+  image                String?
+  phone                String?
+  birthDate            DateTime?
+  role                 String     @default("Administrador")
+  news                 news[]
+  approvedForms        ShareholderFormulario[] @relation("ApprovedForms")
+  rejectedForms        ShareholderFormulario[] @relation("RejectedForms")
+
+  PasswordResetTokenAdmin PasswordResetTokenAdmin[]
+  // Nuevas relaciones para Directiva
+  directivaContent     DirectivaContent[]
+  directivaMembers     DirectivaMember[]
+}
+
+model news {
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now())
+  title            String
+  publicationDate  DateTime  @default(now())
+  summary          String
+  content          String    
+  imageUrl         String?   
+  imageSize        String?   
+  authorId         Int
+  author           admin    @relation(fields: [authorId], references: [id])
+  isPublished      Boolean  @default(false)
+  tags             String[]
+}
+
+model users {
+  id                   Int        @id @default(autoincrement())
+  createdAt            DateTime   @default(now())
+  name                 String
+  lastName             String
+  cedula               String     @unique
+  accountNumber        String     @unique
+  email                String?    @unique
+  password             String?
+  description          String?
+  addressHome          String?
+  areaPosition         String?
+  institutionLevel     String?
+  location             String?
+  fingerprintCode      String?    @unique
+  ultimosDigitosCarnet String?    
+  foto_perfil          Bytes?
+  foto_portada         Bytes?
+  phone                String?
+  birthDate            DateTime?
+  status               String?
+  role                 String     @default("Accionista")
+  credencialPath       String?
+
+  resetTokens          PasswordResetToken[]
+  creditos             CreditForm[]        @relation("CreditoAccionistas")
+  MonthlyContribution MontoContribution[]
+  NotificationReader NotificationReader[]
+  AccionistaLista      AccionistaLista?  // NUEVA RELACIÓN: Un usuario puede estar en la lista de accionistas
+
+  siguiendo            AccionistaFollow[] @relation("AccionistaFollowing")  // NUEVA RELACIÓN: Accionistas que sigue
+  
+  seguidores           AccionistaFollow[] @relation("AccionistaFollowed")  // NUEVA RELACIÓN: Accionistas que lo siguen
+
+  depositos            Deposito[] // Relacion inversa con depositos
+  retiros               Retiro[] //Relacion inversa con retiros
+  inversiones          Inversion[]  //Relacion inversa con inversiones
+  transferenciasEnviadas  Transferencia[] @relation("TransferFrom") //relacion inversa con transferencias pero el origen
+  transferenciasRecibidas Transferencia[] @relation("TransferTo") //relacion inversa con transferencias pero el destino
+  donaciones      Donacion[]  //Relacion inversa con las donaciones
+  transacciones Transaccion[]  //Relacion inversa con el historial de transaferencias
+}
+
+// NUEVA TABLA: Lista de Accionistas
+model AccionistaLista {
+  id                   Int      @id @default(autoincrement())
+  userId               Int      @unique // Referencia al usuario registrado
+  user                 users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Campos específicos de la lista de accionistas
+  tipo                 String   // "Mayoritario", "Institucional", "Minoritario"
+  porcentajeParticipacion Float // Porcentaje de participación
+  cantidadAcciones     Int      // Cantidad de acciones
+  
+  // Campos de control
+  activo               Boolean  @default(true) // Si está activo en la lista
+  fechaIngreso         DateTime @default(now()) // Fecha de ingreso a la lista
+  ultimaActualizacion  DateTime @updatedAt // Última actualización automática
+  
+  // Índices para optimización
+  @@index([tipo])
+  @@index([porcentajeParticipacion])
+  @@index([activo])
+}
+
+// NUEVA TABLA: Sistema de seguimiento entre accionistas
+model AccionistaFollow {
+  id                   Int      @id @default(autoincrement())
+  
+  // Quien sigue
+  followerId           Int
+  follower             users    @relation("AccionistaFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  
+  // A quien sigue
+  followedId           Int  
+  followed             users    @relation("AccionistaFollowed", fields: [followedId], references: [id], onDelete: Cascade)
+  
+  // Fecha de seguimiento
+  fechaSeguimiento     DateTime @default(now())
+  
+  // Un usuario no puede seguir al mismo accionista dos veces
+  @@unique([followerId, followedId])
+  
+  // Índices para optimización
+  @@index([followerId])
+  @@index([followedId])
+}
+
+model MontoContribution {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  user         users    @relation(fields: [userId], references: [id])
+  year         Int
+  month        Int      // 1 = enero, 2 = febrero, etc.
+  amountToPay  Float    // El monto que se debe pagar
+  amountPaid   Float    // Cuánto ha pagado
+  status       String   @default("Pendiente") // Pendiente, Pagado
+  paidAt       DateTime? // Fecha en la que se pagó (si aplica)
+  comments    String?  // NUEVO CAMPO para comentarios del admin
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, year, month])
+}
+
+// MODELO PARA BALANCES FINANCIEROS
+model FinancialBalance {
+  id                    Int      @id @default(autoincrement())
+  year                  Int      
+  month                 Int      // 1 = enero, 2 = febrero, etc.
+  
+  // Aportaciones mensuales - pueden ser calculadas automáticamente o sobrescritas
+  totalShareholderContributions Float @default(0)
+  isContributionsOverridden     Boolean @default(false) // Si fue sobrescrito manualmente
+  
+  // Ingresos de créditos - pueden ser calculados automáticamente o sobrescritos  
+  totalCreditIncome            Float    @default(0)
+  isCreditIncomeOverridden     Boolean  @default(false) // Si fue sobrescrito manualmente
+  
+  // Campos de auditoría y control
+  lastModifiedAt        DateTime?                 // Última modificación manual
+  lastModifiedById      Int?                      // Quién hizo la última modificación
+  
+  // Campos adicionales
+  adminNotes           String?  // Notas del administrador sobre las modificaciones
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([year, month])
+  @@index([year])
+  @@index([year, month])
+}
+
+// NUEVA TABLA PARA GANANCIAS INSTITUCIONALES
+model InstitutionalEarnings {
+  id                Int      @id @default(autoincrement())
+  year              Int      // Año de las ganancias
+  month             Int      // Mes de las ganancias (1-12)
+  
+  // Tres categorías principales de ganancias
+  intereses         Float    @default(0)    // Ganancias por intereses
+  creditos          Float    @default(0)    // Ganancias por créditos otorgados
+  otrosIngresos     Float    @default(0)    // Otros tipos de ingresos
+  
+  // Campos de control para saber si fueron modificados manualmente
+  interesesModified Boolean  @default(false)  // Si los intereses fueron modificados manualmente
+  creditosModified  Boolean  @default(false)  // Si los créditos fueron modificados manualmente
+  otrosModified     Boolean  @default(false)  // Si otros ingresos fueron modificados manualmente
+  
+  // Campos de auditoría
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  lastModifiedAt    DateTime? // Última vez que se modificó manualmente
+
+  // Índices para optimizar consultas
+  @@unique([year, month]) // Un solo registro por mes/año
+  @@index([year])         // Búsquedas por año
+  @@index([year, month])  // Búsquedas por año y mes específico
+}
+
+// Tabla para el contenido general de la Directiva
+model DirectivaContent {
+  id                    Int      @id @default(autoincrement())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+  // Campos del SectionContent
+  title                String   // "Directiva de la Fundación"
+  description          String   @db.Text // Descripción larga
+  quote                String   @db.Text // Cita o frase destacada
+  
+  // Campos del InstitutionalMessage
+  institutionalTitle   String   // "Compromiso con la Excelencia"
+  institutionalContent String   @db.Text // Contenido del mensaje institucional
+  
+  // Control de edición
+  adminId              Int      // ID del admin que creó/editó
+  admin                admin    @relation(fields: [adminId], references: [id])
+  
+  @@map("directiva_content")
+}
+
+// Tabla para los miembros de la Directiva
+model DirectivaMember {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Campos del miembro
+  title     String   // "Presidente de la Fundación"
+  name      String   // "Dr. Carlos Méndez"
+  image     String?  // URL de la imagen
+  href      String   // Enlace del perfil
+  position  Int      @default(0) // Para ordenar los miembros
+  
+  // Control de edición
+  adminId   Int      // ID del admin que creó/editó
+  admin     admin    @relation(fields: [adminId], references: [id])
+  
+  @@map("directiva_members")
+}
+
+//tabla para la informacion de las asambleas
+model Asamblea {
+  id         Int      @id @default(autoincrement())
+  fecha      DateTime
+  tipo       String
+  modalidad  String
+  lugar      String
+  horaInicio String
+  horaFin    String
+
+  agenda      String[]
+  documentos  String[]
+  requisitos  String[]
+  contacto    String
+  telefono    String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Capacitacion {
+  id           Int       @id @default(autoincrement())
+  fecha        DateTime  
+  modalidad    String    
+  lugar        String    
+  horaInicio String
+  horaFin    String
+  tematica     String    
+  descripcion  String    
+  agenda       String[]  
+  materiales   String[]  
+  requisitos   String[]  
+  contacto     String    
+  telefono     String   
+  enlace String?
+ 
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+
+model PasswordResetToken {
+  id        Int        @id @default(autoincrement())
+  token     String     @unique
+  userId    Int
+  user      users      @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime   @default(now())
+}
+
+model PasswordResetTokenAdmin {
+  id        Int        @id @default(autoincrement())
+  token     String     @unique
+  adminId    Int
+  admin     admin @relation(fields: [adminId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime   @default(now())
+}
+
+model ShareholderFormulario {
+  numeroDocumento         Int       @id @default(autoincrement())
+  cedula                  String    @unique
+  nombres                 String
+  apellidos               String
+  email                   String
+  direccion               String
+  pais                    String
+  ciudad                  String
+  provincia               String
+  canton                  String
+  estadoCivil             String
+  tituloProfesional       String
+  nombreUniversidad       String?
+  descripcionProfesional  String?
+  numeroTelefono          String
+  codigoPais              String?
+  discapacidad            String
+  tipodiscapacidad        String?
+  descripcionDiscapacidad String?
+  fechaNacimiento         String
+  fechaSolicitud          String
+  fechaEmision            String
+  montoInversion          Float
+  comprobantePago         String?
+  estado                  String    @default("pendiente") // pendiente, aceptado, rechazado
+  tipo                    String
+  creadoEn                DateTime  @default(now())
+  revisadoEn              DateTime?
+  aprobadoPorId           Int?
+  rechazadoPorId          Int?
+  comentariosRechazo      String?
+  aprobadoPor             admin?    @relation("ApprovedForms", fields: [aprobadoPorId], references: [id])
+  rechazadoPor            admin?    @relation("RejectedForms", fields: [rechazadoPorId], references: [id])
+}
+
+model CreditForm {
+  numeroDocumento         Int         @id @default(autoincrement())
+  cedula                  String
+  nombres                 String
+  apellidos               String
+  email                   String
+  direccion               String
+  pais                    String
+  ciudad                  String
+  provincia               String
+  canton                  String
+  estadoCivil             String
+  tituloProfesional       String
+  nombreUniversidad       String?
+  descripcionProfesional  String?
+  numeroTelefono          String
+  codigoPais              String?
+  discapacidad            String
+  tipodiscapacidad        String?
+  descripcionDiscapacidad String?
+  fechaEmision            String
+  montoCredito            Float
+  tipodeCredito           String
+  creadoEn                DateTime    @default(now())
+
+  garantes                Guarantor[]
+  accionistas             users[] @relation("CreditoAccionistas")
+
+  @@index([cedula])
+  @@index([fechaEmision])
+  @@index([tipodeCredito])
+}
+
+model Guarantor {
+  id                 Int        @id @default(autoincrement())
+  nombresGarante     String
+  apellidosGarante   String 
+  whatsappGarante    String
+  solicitudId        Int
+  solicitud          CreditForm @relation(fields: [solicitudId], references: [numeroDocumento], onDelete: Cascade)
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  type      String   // Noticia, Evento, etc.
+  date      DateTime @default(now())
+  hour      String
+  readers   NotificationReader[]
+}
+
+model NotificationReader {
+  id             Int       @id @default(autoincrement())
+  notificationId Int
+  userId         Int
+  readAt         DateTime?
+
+  notification   Notification   @relation(fields: [notificationId], references: [id])
+  user           users          @relation(fields: [userId], references: [id])
+
+  @@unique([notificationId, userId])
+}
+
+// modelo para los depositos de los usuarios accionistas
+model Deposito {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  user           users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount         Float
+  method         String   // Ej: "Transferencia", "Tarjeta"
+  status         String   @default("Pendiente") // Pendiente, Aprobado, Rechazado
+  comprobanteUrl String?  // URL del comprobante (si aplica)
+
+  fechaDeposito  DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// modelo para los depositos de los usuarios accionistas
+model Retiro {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  user           users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount         Float
+  method         String   // "Transferencia", "Cheque"
+  destination    String   // Cuenta bancaria o referencia
+  status         String   @default("Pendiente") // Pendiente, Aprobado, Rechazado
+  requestedAt    DateTime @default(now())
+  approvedAt     DateTime?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// modelo para las inversiones de los usuarios accionistas
+model Inversion {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  user           users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount         Float
+  plazoMeses     Int
+  origen         String   // "Saldo Disponible", "Transferencia Externa"
+  rentabilidad   Float?   // Porcentaje estimado (si aplica)
+
+  fechaInicio    DateTime @default(now())
+  fechaFin       DateTime?
+  status         String   @default("Pendiente") // Pendiente, Activo, Finalizado
+  comprobanteUrl String?  // En caso de transferencia externa
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// modelo para las transferencias de los usuarios accionistas
+model Transferencia {
+  id           Int      @id @default(autoincrement())
+  fromUserId   Int
+  toUserId     Int
+
+  fromUser     users    @relation("TransferFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser       users    @relation("TransferTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  referenciaId Int?
+
+  amount       Float
+  concepto     String
+  fecha        DateTime @default(now())
+
+  createdAt    DateTime @default(now())
+
+  @@index([fromUserId])
+  @@index([toUserId])
+}
+
+// modelo para las donaciones de los usuarios accionistas
+model Donacion {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  user            users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  causa           String
+  amount          Float
+  mensaje         String?
+  anonimo         Boolean  @default(false)
+
+  fechaDonacion   DateTime @default(now())
+  createdAt       DateTime @default(now())
+}
+
+// modelo para el historial de transacciones de los usuarios accionistas
+model Transaccion {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  user         users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tipo         String   // "Depósito", "Retiro", "Inversión", "Transferencia", "Donación", "Aportación"
+  referenciaId Int?     // ID relacionado si aplica
+  descripcion  String?
+  monto        Float
+
+  fecha        DateTime @default(now())
+}
