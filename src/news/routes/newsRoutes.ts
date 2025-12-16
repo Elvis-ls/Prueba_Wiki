@@ -8,8 +8,7 @@ import {
   publicarNewsController,
   noPublicarNewsController,
   getImagenNoticiaController,
-  
-  // Nuevos controllers
+
   likeNoticiaController,
   unlikeNoticiaController,
   getNoticiaLikesController,
@@ -24,9 +23,6 @@ import { uploadMemory } from '../../util/upload';
 
 const router = express.Router();
 
-// ============================================
-// RUTAS PÚBLICAS (Noticias)
-// ============================================
 // Obtener imagen de noticia
 router.get('/news/:id/portada', getImagenNoticiaController);
 
@@ -36,9 +32,6 @@ router.get('/news', getTodasNoticiasController);
 // Obtener noticia específica con likes y comentarios
 router.get('/news/:id', getNoticiaByIdController);
 
-// ============================================
-// RUTAS ACCIONISTAS (Likes y Comentarios)
-// ============================================
 // Dar like a una noticia
 router.post('/news/:id/like', verifyJwt, likeNoticiaController);
 
