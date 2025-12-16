@@ -80,9 +80,6 @@ export const agregarPagoMensual = async ({
   return nuevoPago;
 };
 
-// ============================================
-// 3. VER MONTO_CONTRIBUCION CON SUS PAGOS (ACCIONISTA/ADMIN)
-// ============================================
 export const obtenerMontoContribucionConPagos = async (accionista_id: number) => {
   const montosContribucion = await prisma.monto_contribucion.findMany({
     where: { accionista_id },
@@ -173,9 +170,6 @@ export const obtenerMontoContribucionConPagos = async (accionista_id: number) =>
   return resultado;
 };
 
-// ============================================
-// 4. APROBAR/RECHAZAR UN PAGO (ADMIN)
-// ============================================
 export const aprobarRechazarPago = async (
   pago_id: number,
   aprobar: boolean,
