@@ -14,10 +14,6 @@ import {
 
 const router = express.Router();
 
-// ============================================
-// RUTAS PARA ACCIONISTAS
-// ============================================
-
 /**
  * 1. Obtener ID del monto_contribucion
  * GET /api/contribution/obtener-id/:accionista_id/:anio/:mes
