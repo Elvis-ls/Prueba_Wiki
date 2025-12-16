@@ -16,7 +16,7 @@ import cambiarPRoutes from './cambiarPassword/routes/cambiarP.routes'
 import adminProfileRoutes from './Admin/routes/profile'; // NUEVA RUTA
 import newsRoutes from './Admin/routes/news.routes'; // ← LÍNEA ACTUALIZADA
 //import newsRoutes from './news/routes/newsRoutes';
-import shareholderRoute from './ShareHolderFormulario/routes/shareholder.routes';
+import shareholderRoute from './lista_accionista/routes/shareholder.routes';
 import recoveryPassword from './User/recoveryPassword/route/recoveryRoute';
 import resetPassword from './User/recoveryPassword/route/resetPasswordRoute'
 //import updatePassword from './User/updatePassword/route/updatePasswordRoute'

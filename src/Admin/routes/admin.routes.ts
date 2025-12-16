@@ -3,8 +3,8 @@ import { UserControllerAdmin } from '../controllers/UserControllerAdmin';
 import { UserServiceAdmin } from '../services/UserServiceAdmin';
 //import { CreateAdminController } from '../controllers/CreateAdminController';
 import { crearAdminController } from '../controllers/adminController';
-import { ShareholderFormService } from '../../ShareHolderFormulario/services/shareholderForm.service';
-import { UpdateShareholderFormController } from '../../ShareHolderFormulario/controllers/UpdateShareholderFormController';
+import { ShareholderFormService } from '../../lista_accionista/services/listaAccionistaService';
+import { UpdateShareholderFormController } from '../../lista_accionista/controllers/UpdateShareholderFormController';
 import { authenticateAdmin } from '../middleware/authMiddleware';
 
 const router = express.Router();
