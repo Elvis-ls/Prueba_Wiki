@@ -21,16 +21,12 @@ const router = express.Router();
 
 // Ruta para obtener la lista de accionistas con paginación y filtros
 router.get('/shareholders', verifyJwt, getShareholdersController);
-
 // Ruta para obtener accionista específico por ID, en la vista "Lista de accionistas"
 router.get('/shareholders/:id', verifyJwt, getShareholderByIdController);
-
 // Ruta Toggle seguir/dejar de seguir accionista (requiere autenticación)
 router.post('/shareholders/follow/:userId', verifyJwt, toggleFollowShareholderController);
-
 // Ruta para obtener accionista "Siguiendo" pero para el modal en ProfileHeader
 router.get('/following', verifyJwt, getFollowingController);
-
 // Verificar si un accionista tiene 6 meses de antigüedad
 router.get('/shareholders/:id/tiene6meses', verifyJwt, checkSixMonthsController);
 
