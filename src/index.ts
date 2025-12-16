@@ -23,7 +23,7 @@ import resetPassword from './User/recoveryPassword/route/resetPasswordRoute'
 import recoveryPasswordAdmin from './Admin/recoveryPassword/route/recoveryRouteAdmin';
 // import resetPasswordAdmin from './Admin/recoveryPassword/route/resetPasswordRouteAdmin'
 import adminRoutes from './Admin/routes/admin.routes';
-import montoContributionRoute from './MontoContribution/routes/MontoContributionRoute';
+import montoContributionRoute from './monto_contribucion/routes/MontoContributionRoute';
 import paymentContributionRoute from './PaymentContribution/routes/payment.routes';
 import notificationRoutes from './news/routes/notificationRoute';
 import creditRoutes from './CreditForm/routes/creditRoutes';

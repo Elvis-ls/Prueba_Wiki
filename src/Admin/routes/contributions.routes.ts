@@ -1,6 +1,6 @@
 import express from 'express';
-import { MontoContributionService } from '../../MontoContribution/services/MontoContributionService';
-import { MontoContributionController } from '../../MontoContribution/controllers/MontoContributionController';
+import { MontoContributionService } from '../../monto_contribucion/services/MontoContributionService';
+import { MontoContributionController } from '../../monto_contribucion/controllers/MontoContributionController';
 
 const router = express.Router();
 const service = new MontoContributionService();
