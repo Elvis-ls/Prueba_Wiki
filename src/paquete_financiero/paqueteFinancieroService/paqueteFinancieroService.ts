@@ -37,3 +37,5 @@ export const getEstadoSolicitudPorAccionista = async (accionistaId: number) => {
     estado: solicitud.estado // "Pendiente", "Aprobado", "Rechazado"
   };
 };
+
+
